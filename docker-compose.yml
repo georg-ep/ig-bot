@@ -1,0 +1,50 @@
+version: "3.9"
+   
+services:
+  db:
+    image: postgres:12-alpine
+    env_file: .env
+    ports:
+      - "5431:5431"
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345678
+  app:
+    build:
+      context: .
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:/app
+    env_file: .env
+    depends_on:
+      - db
+
+  redis:
+    image: redis:alpine
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/var/lib/redis
+    command: redis-server --requirepass ${REDIS_PASSWORD} --protected-mode yes
+
+  celeryworker:
+    image: 'celery:5.1.2'
+    volumes:
+      - ./app:/app
+      - ./scripts:/scripts
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+      - SERVER_NAME=localhost
+      - SERVER_HOST=http://localhost
+    build:
+      context: .
+      dockerfile: celery.dockerfile
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-false}

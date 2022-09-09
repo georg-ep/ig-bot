@@ -1,0 +1,17 @@
+{% extends 'admin/change_form.html' %}
+
+{% block submit_buttons_bottom %}
+    {% load i18n admin_urls %}
+    {% if can_start_session %}
+      <div class="submit-row">
+          <input type="submit" value="{% translate 'Start Session' %}" name="_start">
+      </div>
+    {% endif %}
+    {% if can_end_session %}
+        <div class="submit-row">
+            <input type="submit" value="{% translate 'End Session' %}" name="_end">
+        </div>
+    {% endif %}
+    {{ block.super }}
+
+{% endblock %}
